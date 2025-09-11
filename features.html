@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Features — Fittropolis</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Fittropolis</a>
+      <nav class="nav">
+        <a href="features.html">Features</a>
+        <a href="pantry.html">Pantry</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="scanner.html">Scanner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Features</h1>
+
+    <section class="feature">
+      <h2>AI Food Scanner</h2>
+      <p>Scan barcodes or take a photo. Our AI recognizes food items, estimates serving size, and suggests nutritional values.</p>
+      <p><strong>Integration note:</strong> Connect a barcode library (e.g. html5-qrcode, QuaggaJS) and an AI image recognition / nutrition API. See <code>js/app.js</code> for placeholders.</p>
+    </section>
+
+    <section class="feature">
+      <h2>Digital Pantry & Expiry Tracking</h2>
+      <p>Add items via scanning or manual input. Pantry lists quantities, purchase dates, and expiry predictions. Get alerts for items close to expiring.</p>
+    </section>
+
+    <section class="feature">
+      <h2>AI Recipe Generator</h2>
+      <p>Generate healthy recipes tailored to your goals and current pantry contents. Recipes come with estimated macros and steps.</p>
+    </section>
+
+    <section class="feature">
+      <h2>Food Journal & Insights</h2>
+      <p>Log foods, view calories and macronutrient trends, and get AI-driven feedback and suggestions to improve adherence to your goals.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year-2"></span> Fittropolis</small>
+    </div>
+  </footer>
+</body>
+</html>
