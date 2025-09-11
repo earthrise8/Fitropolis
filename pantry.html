@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pantry — Fittropolis</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Fittropolis</a>
+      <nav class="nav">
+        <a href="features.html">Features</a>
+        <a href="pantry.html">Pantry</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="scanner.html">Scanner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Your Pantry (demo)</h1>
+    <p>This is a demo UI. The pantry below is stored in localStorage for demo; replace with your backend later.</p>
+
+    <section id="pantry-app">
+      <form id="add-item-form" class="form-inline">
+        <input id="item-name" type="text" placeholder="Item name (e.g. Greek yogurt)" required />
+        <input id="item-qty" type="number" min="1" placeholder="Qty" value="1" />
+        <input id="item-expiry" type="date" />
+        <button class="btn" type="submit">Add to pantry</button>
+      </form>
+
+      <div id="pantry-list" class="pantry-list">
+        <!-- pantry items appended here by js -->
+      </div>
+    </section>
+
+    <aside class="note">
+      <h3>Implementation tips</h3>
+      <ul>
+        <li>Use server-side DB for production (Firestore, Supabase, Postgres + API).</li>
+        <li>Expire prediction: combine barcode product 'best before' with user-provided date and model heuristics.</li>
+        <li>Add push/email notifications for expiring foods.</li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year-3"></span> Fittropolis</small>
+    </div>
+  </footer>
+</body>
+</html>
