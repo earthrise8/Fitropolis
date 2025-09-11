@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scanner — Fittropolis</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">Fittropolis</a>
+      <nav class="nav">
+        <a href="features.html">Features</a>
+        <a href="pantry.html">Pantry</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="scanner.html">Scanner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Scan Food</h1>
+    <p>Try a demo barcode scan or upload an image for AI identification.</p>
+
+    <section class="scanner-grid">
+      <div class="scanner-box">
+        <h3>Barcode scanner (camera)</h3>
+        <p>Click start and allow camera access. (Demo: no real scanner included — see instructions).</p>
+        <button class="btn" id="start-scan">Start Camera Scan (demo)</button>
+        <div id="camera-preview" class="camera-preview" aria-hidden="true">
+          <!-- Camera preview inserted by scanner lib in production -->
+          <p class="muted">Camera preview will appear here when integrated with a barcode scanning library.</p>
+        </div>
+      </div>
+
+      <div class="scanner-box">
+        <h3>Image recognition</h3>
+        <p>Upload a photo — an AI model can identify the food and estimate the serving size.</p>
+        <input id="image-upload" type="file" accept="image/*" />
+        <div id="image-result" class="image-result"></div>
+      </div>
+    </section>
+
+    <section class="integration-note">
+      <h4>Integration hints</h4>
+      <ul>
+        <li>Barcode scanning libraries: <em>html5-qrcode</em>, <em>QuaggaJS</em> or native WebBarcodeDetector (where supported).</li>
+        <li>AI image recognition: upload image to your server and call an image recognition model, or a hosted API (Vision endpoint).</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year-5"></span> Fittropolis</small>
+    </div>
+  </footer>
+</body>
+</html>
