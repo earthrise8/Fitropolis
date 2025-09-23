@@ -1,75 +1,538 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fittropolis — Food journal & health app</title>
-  <meta name="description" content="Fittropolis: food journal, pantry, AI recipes and barcode/AI-assisted food scanning to get you back to fit." />
-  <link rel="stylesheet" href="css/style.css" />
-  <script defer src="js/app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitropolis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+    </style>
 </head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="index.html">Fittropolis</a>
-      <nav class="nav">
-        <a href="features.html">Features</a>
-        <a href="pantry.html">Pantry</a>
-        <a href="recipes.html">Recipes</a>
-        <a href="scanner.html">Scanner</a>
-      </nav>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
+            <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce delay-100"></div>
+            <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce delay-200"></div>
+        </div>
     </div>
-  </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Welcome to Fittropolis</h1>
-      <p>Food journaling, AI-assisted scanning, digital pantry tracking, and automatic healthy recipes matched to your goals.</p>
-      <div class="hero-cta">
-        <a class="btn" href="features.html">See Features</a>
-        <a class="btn secondary" href="scanner.html">Try the Scanner (demo)</a>
-      </div>
-    </section>
+    <!-- Main Content Container -->
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-2">Fitropolis</h1>
+        <p class="text-center text-gray-600 mb-6">Your personal virtual pantry and nutrition assistant.</p>
 
-    <section class="how-it-works grid-3">
-      <article>
-        <h3>Scan or Add</h3>
-        <p>Use camera barcode scanning, AI-powered image recognition, or manual entry to add foods quickly.</p>
-      </article>
-      <article>
-        <h3>Smart Pantry</h3>
-        <p>Track what you own, get expiry reminders, and never waste food again.</p>
-      </article>
-      <article>
-        <h3>AI Recipes</h3>
-        <p>Get nutritionally-balanced recipes that match your goals and use what’s about to expire.</p>
-      </article>
-    </section>
-
-    <section class="feature-teaser">
-      <h2>Get motivated. Stay on track.</h2>
-      <p>Journal meals, see trends, get feedback, and receive AI suggestions to improve meals aligned with your goals.</p>
-      <div class="cards">
-        <div class="card">
-          <h4>Daily Journal</h4>
-          <p>Log meals in seconds. See calories, macronutrients, and trends.</p>
+        <!-- User Info & Authentication Section -->
+        <div id="auth-section" class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-2">User Authentication</h2>
+            <div id="user-status" class="text-sm text-gray-500">
+                <p>Status: <span id="auth-status">Authenticating...</span></p>
+                <p>User ID: <span id="user-id">N/A</span></p>
+            </div>
         </div>
-        <div class="card">
-          <h4>Goals & Feedback</h4>
-          <p>Set goals, get real-time AI guidance on meal swaps and improvements.</p>
-        </div>
-        <div class="card">
-          <h4>Integrations</h4>
-          <p>Sync with Apple Health / Google Fit (future), export data, or connect devices.</p>
-        </div>
-      </div>
-    </section>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <small>© <span id="year"></span> Fittropolis — Built for healthier habits.</small>
+        <!-- Virtual Pantry Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Virtual Pantry</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                <input type="text" id="food-input" placeholder="Enter food name (e.g., Milk)" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="add-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Add to Pantry</button>
+            </div>
+            <div id="pantry-list" class="space-y-4">
+                <!-- Pantry items will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Recipe Generator Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Recipe Generator</h2>
+            <button id="generate-recipe-btn" class="w-full p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4 flex items-center justify-center">
+                <i class="fas fa-magic mr-2"></i> Generate Recipe from Pantry
+            </button>
+            <div id="recipe-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                <h3 class="text-xl font-bold mb-2">Generated Recipe</h3>
+                <h4 id="recipe-name" class="text-lg font-semibold text-gray-800 mb-1"></h4>
+                <p id="recipe-description" class="text-gray-600 mb-4"></p>
+                <h5 class="font-bold mb-1">Ingredients:</h5>
+                <ul id="recipe-ingredients" class="list-disc list-inside text-gray-700 mb-4"></ul>
+                <h5 class="font-bold mb-1">Instructions:</h5>
+                <ol id="recipe-instructions" class="list-decimal list-inside text-gray-700"></ol>
+            </div>
+        </div>
+
+        <!-- AI-Powered Features Section -->
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">✨ Powered by AI</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <button id="generate-meal-plan-btn" class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-calendar-alt mr-2"></i> Generate Meal Plan
+                </button>
+                <button id="substitute-ingredient-btn" class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                    <i class="fas fa-exchange-alt mr-2"></i> Ingredient Substitution
+                </button>
+            </div>
+            
+            <div id="ai-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                <h3 id="ai-output-title" class="text-xl font-bold mb-2"></h3>
+                <div id="ai-output-content" class="text-gray-700"></div>
+            </div>
+        </div>
     </div>
-  </footer>
+
+    <!-- Modal for Ingredient Substitution -->
+    <div id="substitution-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-2xl font-semibold mb-4">Substitute Ingredient</h3>
+            <div class="mb-4">
+                <label for="substitution-input" class="block text-sm font-medium text-gray-700 mb-1">Enter ingredient to substitute:</label>
+                <input type="text" id="substitution-input" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="e.g., all-purpose flour">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button id="substitute-confirm-btn" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Substitutions</button>
+                <button id="substitution-cancel-btn" class="p-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Set the debug level for Firebase
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        setLogLevel('debug');
+
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // UI elements
+        const authStatusEl = document.getElementById('auth-status');
+        const userIdEl = document.getElementById('user-id');
+        const foodInput = document.getElementById('food-input');
+        const addFoodBtn = document.getElementById('add-food-btn');
+        const pantryList = document.getElementById('pantry-list');
+        const generateRecipeBtn = document.getElementById('generate-recipe-btn');
+        const generateMealPlanBtn = document.getElementById('generate-meal-plan-btn');
+        const substituteIngredientBtn = document.getElementById('substitute-ingredient-btn');
+        const recipeOutput = document.getElementById('recipe-output');
+        const recipeNameEl = document.getElementById('recipe-name');
+        const recipeDescEl = document.getElementById('recipe-description');
+        const recipeIngredientsEl = document.getElementById('recipe-ingredients');
+        const recipeInstructionsEl = document.getElementById('recipe-instructions');
+        const aiOutput = document.getElementById('ai-output');
+        const aiOutputTitle = document.getElementById('ai-output-title');
+        const aiOutputContent = document.getElementById('ai-output-content');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const substitutionModal = document.getElementById('substitution-modal');
+        const substitutionInput = document.getElementById('substitution-input');
+        const substituteConfirmBtn = document.getElementById('substitute-confirm-btn');
+        const substitutionCancelBtn = document.getElementById('substitution-cancel-btn');
+        const API_KEY = ""; // Gemini API key is automatically provided
+
+        let db, auth, userId;
+
+        // Initialize Firebase and handle authentication
+        const initFirebase = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        authStatusEl.textContent = 'Signed In';
+                        userIdEl.textContent = userId;
+                        console.log("Firebase initialized and user signed in:", userId);
+                        setupPantryListener(userId);
+                    } else {
+                        authStatusEl.textContent = 'Signed Out';
+                        userIdEl.textContent = 'N/A';
+                        console.log("User is signed out.");
+                    }
+                });
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                authStatusEl.textContent = 'Error';
+                userIdEl.textContent = 'Failed';
+            }
+        };
+
+        // Set up real-time listener for the virtual pantry
+        const setupPantryListener = (uid) => {
+            const userPantryCollectionRef = collection(db, `artifacts/${appId}/users/${uid}/pantry`);
+            const q = query(userPantryCollectionRef);
+
+            onSnapshot(q, (snapshot) => {
+                pantryList.innerHTML = '';
+                const items = [];
+                snapshot.forEach(doc => {
+                    items.push({ id: doc.id, ...doc.data() });
+                });
+
+                items.sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+
+                if (items.length === 0) {
+                    pantryList.innerHTML = '<p class="text-center text-gray-500">Your pantry is empty. Add some food!</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200';
+                    itemEl.innerHTML = `
+                        <span class="text-gray-700">${item.name}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">Added: ${new Date(item.dateAdded).toLocaleDateString()}</span>
+                            <button data-id="${item.id}" class="use-btn p-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Use</button>
+                        </div>
+                    `;
+                    pantryList.appendChild(itemEl);
+                });
+                
+                document.querySelectorAll('.use-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const itemId = event.target.getAttribute('data-id');
+                        // Use a custom modal or message box instead of alert()
+                        const confirmed = confirm('Are you sure you want to remove this item?');
+                        if (confirmed) {
+                             try {
+                                const itemRef = doc(db, `artifacts/${appId}/users/${uid}/pantry`, itemId);
+                                await deleteDoc(itemRef);
+                                console.log("Item removed successfully.");
+                             } catch (error) {
+                                console.error("Error removing item:", error);
+                             }
+                        }
+                    });
+                });
+            }, (error) => {
+                console.error("Error listening to pantry data:", error);
+                pantryList.innerHTML = '<p class="text-center text-red-500">Failed to load pantry data.</p>';
+            });
+        };
+
+        // Add food to the pantry
+        const addFoodToPantry = async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            const foodName = foodInput.value.trim();
+            if (foodName === '') {
+                return;
+            }
+
+            try {
+                const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/pantry`), {
+                    name: foodName,
+                    dateAdded: new Date().toISOString(),
+                });
+                console.log("Document written with ID:", docRef.id);
+                foodInput.value = '';
+            } catch (error) {
+                console.error("Error adding document:", error);
+            }
+        };
+
+        // Function to make API calls to Gemini
+        const callGeminiApi = async (prompt, schema) => {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema,
+                }
+            };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                    const jsonResponse = result.candidates[0].content.parts[0].text;
+                    return JSON.parse(jsonResponse);
+                } else {
+                    throw new Error("Invalid response from API.");
+                }
+            } catch (error) {
+                console.error("Error during API call:", error);
+                return null;
+            }
+        };
+
+        // Function to generate a recipe from the AI model
+        const generateRecipe = async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            recipeOutput.classList.add('hidden');
+            aiOutput.classList.add('hidden');
+
+            try {
+                const pantryItems = await getPantryItems();
+                const userPrompt = `Generate a single, unique, and easy-to-make recipe using only the following ingredients from my pantry: ${pantryItems.join(', ')}. Provide a brief description of the dish.`;
+
+                const recipeSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "recipeName": { "type": "STRING" },
+                        "description": { "type": "STRING" },
+                        "ingredients": {
+                            "type": "ARRAY",
+                            "items": { "type": "STRING" }
+                        },
+                        "instructions": {
+                            "type": "ARRAY",
+                            "items": { "type": "STRING" }
+                        }
+                    },
+                    "propertyOrdering": ["recipeName", "description", "ingredients", "instructions"]
+                };
+
+                const recipe = await callGeminiApi(userPrompt, recipeSchema);
+                
+                if (recipe) {
+                    recipeNameEl.textContent = recipe.recipeName;
+                    recipeDescEl.textContent = recipe.description;
+                    
+                    recipeIngredientsEl.innerHTML = '';
+                    recipe.ingredients.forEach(ingredient => {
+                        const li = document.createElement('li');
+                        li.textContent = ingredient;
+                        recipeIngredientsEl.appendChild(li);
+                    });
+
+                    recipeInstructionsEl.innerHTML = '';
+                    recipe.instructions.forEach(instruction => {
+                        const li = document.createElement('li');
+                        li.textContent = instruction;
+                        recipeInstructionsEl.appendChild(li);
+                    });
+                    
+                    recipeOutput.classList.remove('hidden');
+                } else {
+                    recipeOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate a recipe. Please try again.</p>';
+                    recipeOutput.classList.remove('hidden');
+                }
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        };
+
+        // Function to get pantry items
+        const getPantryItems = async () => {
+            const pantryItems = [];
+            if (!userId) return pantryItems;
+            
+            const q = query(collection(db, `artifacts/${appId}/users/${userId}/pantry`));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach(doc => {
+                pantryItems.push(doc.data().name);
+            });
+            return pantryItems;
+        }
+
+        // Function to generate a meal plan
+        const generateMealPlan = async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            recipeOutput.classList.add('hidden');
+            aiOutput.classList.add('hidden');
+
+            try {
+                const pantryItems = await getPantryItems();
+                const userPrompt = `Generate a simple, 3-day meal plan (breakfast, lunch, dinner) using the following ingredients from my pantry: ${pantryItems.join(', ')}. Please provide a title for the meal plan, a brief description, and then a list of meals for each day.`;
+
+                const mealPlanSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "planTitle": { "type": "STRING" },
+                        "planDescription": { "type": "STRING" },
+                        "days": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "dayName": { "type": "STRING" },
+                                    "meals": {
+                                        "type": "ARRAY",
+                                        "items": {
+                                            "type": "OBJECT",
+                                            "properties": {
+                                                "mealName": { "type": "STRING" },
+                                                "description": { "type": "STRING" },
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["planTitle", "planDescription", "days"]
+                };
+
+                const mealPlan = await callGeminiApi(userPrompt, mealPlanSchema);
+                
+                if (mealPlan) {
+                    aiOutputTitle.textContent = mealPlan.planTitle;
+                    let contentHtml = `<p class="mb-4">${mealPlan.planDescription}</p>`;
+                    mealPlan.days.forEach(day => {
+                        contentHtml += `<h4 class="font-bold mt-4">${day.dayName}</h4><ul class="list-inside list-disc">`;
+                        day.meals.forEach(meal => {
+                            contentHtml += `<li><strong>${meal.mealName}:</strong> ${meal.description}</li>`;
+                        });
+                        contentHtml += `</ul>`;
+                    });
+                    aiOutputContent.innerHTML = contentHtml;
+                    aiOutput.classList.remove('hidden');
+                } else {
+                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate a meal plan. Please try again.</p>';
+                    aiOutput.classList.remove('hidden');
+                }
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        };
+
+        // Function to get ingredient substitutions
+        const getSubstitutions = async (ingredient) => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            recipeOutput.classList.add('hidden');
+            aiOutput.classList.add('hidden');
+
+            try {
+                const userPrompt = `Provide a list of 3-5 healthy and creative ingredient substitutions for "${ingredient}". Include a brief explanation for why each substitution works.`;
+                const substitutionSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "substitutions": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "item": { "type": "STRING" },
+                                    "reason": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["substitutions"]
+                };
+
+                const substitutions = await callGeminiApi(userPrompt, substitutionSchema);
+
+                if (substitutions) {
+                    aiOutputTitle.textContent = `Substitutions for ${ingredient}`;
+                    let contentHtml = `<ul class="list-disc list-inside space-y-2">`;
+                    substitutions.substitutions.forEach(sub => {
+                        contentHtml += `<li><strong>${sub.item}</strong>: ${sub.reason}</li>`;
+                    });
+                    contentHtml += `</ul>`;
+                    aiOutputContent.innerHTML = contentHtml;
+                    aiOutput.classList.remove('hidden');
+                } else {
+                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to find substitutions. Please try a different ingredient.</p>';
+                    aiOutput.classList.remove('hidden');
+                }
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        };
+        
+        // Modal functions
+        const showSubstitutionModal = () => {
+            substitutionModal.classList.remove('hidden');
+            substitutionInput.focus();
+        };
+
+        const hideSubstitutionModal = () => {
+            substitutionModal.classList.add('hidden');
+        };
+
+        // Event Listeners
+        addFoodBtn.addEventListener('click', addFoodToPantry);
+        foodInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addFoodToPantry();
+            }
+        });
+
+        generateRecipeBtn.addEventListener('click', generateRecipe);
+        generateMealPlanBtn.addEventListener('click', generateMealPlan);
+        substituteIngredientBtn.addEventListener('click', showSubstitutionModal);
+        
+        substitutionCancelBtn.addEventListener('click', hideSubstitutionModal);
+        substituteConfirmBtn.addEventListener('click', () => {
+            const ingredient = substitutionInput.value.trim();
+            if (ingredient) {
+                getSubstitutions(ingredient);
+                hideSubstitutionModal();
+            }
+        });
+
+        // Initial application setup
+        window.onload = initFirebase;
+    </script>
 </body>
 </html>
