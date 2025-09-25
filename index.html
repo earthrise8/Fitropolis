@@ -30,6 +30,11 @@
             z-index: 100;
         }
     </style>
+
+    <!-- Firebase SDKs - Loaded as global variables for GitHub Pages compatibility -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
@@ -119,15 +124,9 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
         // Set the debug level for Firebase
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        setLogLevel('debug');
-
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        firebase.setLogLevel('debug');
 
         // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -163,11 +162,11 @@
         // Initialize Firebase and handle authentication
         const initFirebase = async () => {
             try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
+                const firebaseApp = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
 
-                onAuthStateChanged(auth, (user) => {
+                auth.onAuthStateChanged((user) => {
                     if (user) {
                         userId = user.uid;
                         authStatusEl.textContent = 'Signed In';
@@ -182,9 +181,9 @@
                 });
 
                 if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
+                    await auth.signInWithCustomToken(initialAuthToken);
                 } else {
-                    await signInAnonymously(auth);
+                    await auth.signInAnonymously();
                 }
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
@@ -195,17 +194,15 @@
 
         // Set up real-time listener for the virtual pantry
         const setupPantryListener = (uid) => {
-            const userPantryCollectionRef = collection(db, `artifacts/${appId}/users/${uid}/pantry`);
-            const q = query(userPantryCollectionRef);
+            const userPantryCollectionRef = db.collection(`artifacts/${appId}/users/${uid}/pantry`);
+            const q = userPantryCollectionRef.orderBy('dateAdded'); // Use Firestore query for sorting
 
-            onSnapshot(q, (snapshot) => {
+            q.onSnapshot((snapshot) => {
                 pantryList.innerHTML = '';
                 const items = [];
                 snapshot.forEach(doc => {
                     items.push({ id: doc.id, ...doc.data() });
                 });
-
-                items.sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
 
                 if (items.length === 0) {
                     pantryList.innerHTML = '<p class="text-center text-gray-500">Your pantry is empty. Add some food!</p>';
@@ -228,16 +225,14 @@
                 document.querySelectorAll('.use-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const itemId = event.target.getAttribute('data-id');
-                        // Use a custom modal or message box instead of alert()
-                        const confirmed = confirm('Are you sure you want to remove this item?');
-                        if (confirmed) {
-                             try {
-                                const itemRef = doc(db, `artifacts/${appId}/users/${uid}/pantry`, itemId);
-                                await deleteDoc(itemRef);
-                                console.log("Item removed successfully.");
-                             } catch (error) {
-                                console.error("Error removing item:", error);
-                             }
+                        console.log("A confirmation dialog would appear here. Item to remove:", itemId);
+                        // In a real app, this is where you'd show a custom modal for confirmation.
+                        try {
+                           const itemRef = db.collection(`artifacts/${appId}/users/${uid}/pantry`).doc(itemId);
+                           await itemRef.delete();
+                           console.log("Item removed successfully.");
+                        } catch (error) {
+                           console.error("Error removing item:", error);
                         }
                     });
                 });
@@ -260,7 +255,7 @@
             }
 
             try {
-                const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/pantry`), {
+                const docRef = await db.collection(`artifacts/${appId}/users/${userId}/pantry`).add({
                     name: foodName,
                     dateAdded: new Date().toISOString(),
                 });
@@ -376,8 +371,8 @@
             const pantryItems = [];
             if (!userId) return pantryItems;
             
-            const q = query(collection(db, `artifacts/${appId}/users/${userId}/pantry`));
-            const querySnapshot = await getDocs(q);
+            const pantryRef = db.collection(`artifacts/${appId}/users/${userId}/pantry`);
+            const querySnapshot = await pantryRef.get();
             querySnapshot.forEach(doc => {
                 pantryItems.push(doc.data().name);
             });
