@@ -1,50 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Fitropolis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        .container {
-            max-width: 800px;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .nav-btn.active {
-            border-bottom: 3px solid #3b82f6;
-            color: #3b82f6;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .container { max-width: 800px; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(255,255,255,0.8); display:none; justify-content:center; align-items:center; z-index:100; }
+        .tab-content { display: none; }
+        .tab-content.active { display:block; }
+        .nav-btn.active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
     </style>
 
-    <!-- Firebase SDKs - Loaded as global variables for GitHub Pages compatibility -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <!-- NOTE: Using compat builds so existing namespaced API (firebase.auth(), firebase.firestore(), etc.) works -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-100 flex flex-col items-center min-h-screen p-4">
 
@@ -57,39 +35,28 @@
         </div>
     </div>
 
-    <!-- Main Content Container -->
     <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-2">Fitropolis</h1>
         <p class="text-center text-gray-600 mb-6">Your all-in-one nutrition and activity tracker.</p>
 
-        <!-- User Info & Authentication Section -->
         <div id="auth-section" class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <h2 class="text-2xl font-semibold text-gray-700 mb-2">User Authentication</h2>
             <div id="user-status" class="text-sm text-gray-500">
                 <p>Status: <span id="auth-status">Authenticating...</span></p>
                 <p>User ID: <span id="user-id">N/A</span></p>
+                <p id="firebase-error" class="text-red-500 mt-2 hidden"></p>
             </div>
         </div>
-        
-        <!-- Navigation Tabs -->
+
+        <!-- Navigation -->
         <nav class="flex justify-around bg-gray-100 p-2 rounded-lg mb-6">
-            <button id="nav-pantry" class="nav-btn active p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
-                <i class="fas fa-box"></i> Pantry
-            </button>
-            <button id="nav-journal" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
-                <i class="fas fa-book"></i> Food Journal
-            </button>
-            <button id="nav-tracker" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
-                <i class="fas fa-running"></i> Activity Tracker
-            </button>
-            <button id="nav-counter" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
-                <i class="fas fa-calculator"></i> Calorie Counter
-            </button>
+            <button id="nav-pantry" class="nav-btn active p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors"><i class="fas fa-box"></i> Pantry</button>
+            <button id="nav-journal" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors"><i class="fas fa-book"></i> Food Journal</button>
+            <button id="nav-tracker" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors"><i class="fas fa-running"></i> Activity Tracker</button>
+            <button id="nav-counter" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors"><i class="fas fa-calculator"></i> Calorie Counter</button>
         </nav>
 
-        <!-- Tab Content -->
-        
-        <!-- Pantry & Recipe Generator Tab -->
+        <!-- Tab contents (kept same as your original) -->
         <div id="pantry-tab" class="tab-content active">
             <div class="mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Virtual Pantry</h2>
@@ -99,6 +66,7 @@
                 </div>
                 <div id="pantry-list" class="space-y-4"></div>
             </div>
+
             <div>
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Recipe Generator</h2>
                 <button id="generate-recipe-btn" class="w-full p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4 flex items-center justify-center">
@@ -114,15 +82,12 @@
                     <ol id="recipe-instructions" class="list-decimal list-inside text-gray-700"></ol>
                 </div>
             </div>
+
             <div class="mt-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">✨ More AI Features</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <button id="generate-meal-plan-btn" class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                        <i class="fas fa-calendar-alt mr-2"></i> Generate Meal Plan
-                    </button>
-                    <button id="substitute-ingredient-btn" class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                        <i class="fas fa-exchange-alt mr-2"></i> Ingredient Substitution
-                    </button>
+                    <button id="generate-meal-plan-btn" class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"><i class="fas fa-calendar-alt mr-2"></i> Generate Meal Plan</button>
+                    <button id="substitute-ingredient-btn" class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"><i class="fas fa-exchange-alt mr-2"></i> Ingredient Substitution</button>
                 </div>
                 <div id="ai-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
                     <h3 id="ai-output-title" class="text-xl font-bold mb-2"></h3>
@@ -131,7 +96,6 @@
             </div>
         </div>
 
-        <!-- Food Journal Tab -->
         <div id="journal-tab" class="tab-content">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Food Journal</h2>
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
@@ -146,7 +110,6 @@
             <div id="journal-list" class="space-y-4"></div>
         </div>
 
-        <!-- Activity Tracker Tab -->
         <div id="tracker-tab" class="tab-content">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Activity Tracker</h2>
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
@@ -161,7 +124,6 @@
             <div id="activity-list" class="space-y-4"></div>
         </div>
 
-        <!-- Calorie Counter Tab -->
         <div id="counter-tab" class="tab-content">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Calorie Counter</h2>
             <div class="flex items-center justify-between gap-4 mb-4">
@@ -188,7 +150,7 @@
         </div>
     </div>
 
-    <!-- Modal for Ingredient Substitution -->
+    <!-- Substitution modal -->
     <div id="substitution-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 class="text-2xl font-semibold mb-4">Substitute Ingredient</h3>
@@ -202,8 +164,8 @@
             </div>
         </div>
     </div>
-    
-    <!-- Custom Confirmation Modal -->
+
+    <!-- Conf modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 class="text-2xl font-semibold mb-4" id="modal-title">Confirm Action</h3>
@@ -216,24 +178,22 @@
     </div>
 
     <script>
-        // Set the debug level for Firebase
-        firebase.setLogLevel('debug');
-
-        // Global variables provided by the environment
+        // Global variables provided by the environment (or defaults)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // UI elements
         const authStatusEl = document.getElementById('auth-status');
         const userIdEl = document.getElementById('user-id');
         const loadingOverlay = document.getElementById('loading-overlay');
-        
-        // Navigation buttons
+        const firebaseErrorEl = document.getElementById('firebase-error');
+
+        // navigation & tabs
         const navBtns = document.querySelectorAll('.nav-btn');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        // Pantry tab elements
+        // pantry elements
         const pantryFoodInput = document.getElementById('pantry-food-input');
         const addFoodBtn = document.getElementById('add-food-btn');
         const pantryList = document.getElementById('pantry-list');
@@ -253,7 +213,7 @@
         const substituteConfirmBtn = document.getElementById('substitute-confirm-btn');
         const substitutionCancelBtn = document.getElementById('substitution-cancel-btn');
 
-        // Journal tab elements
+        // journal elements
         const journalFoodInput = document.getElementById('journal-food-input');
         const logFoodBtn = document.getElementById('log-food-btn');
         const journalList = document.getElementById('journal-list');
@@ -261,39 +221,37 @@
         const journalTodayBtn = document.getElementById('journal-today-btn');
         const clearJournalBtn = document.getElementById('clear-journal-btn');
 
-        // Tracker tab elements
+        // tracker elements
         const activityInput = document.getElementById('activity-input');
         const logActivityBtn = document.getElementById('log-activity-btn');
         const activityList = document.getElementById('activity-list');
         const trackerDateInput = document.getElementById('tracker-date-input');
         const trackerTodayBtn = document.getElementById('tracker-today-btn');
         const clearTrackerBtn = document.getElementById('clear-tracker-btn');
-        
-        // Calorie Counter tab elements
+
+        // calorie counter elements
         const counterDateInput = document.getElementById('counter-date-input');
         const counterTodayBtn = document.getElementById('counter-today-btn');
         const caloriesConsumedEl = document.getElementById('calories-consumed');
         const caloriesBurnedEl = document.getElementById('calories-burned');
         const caloriesNetEl = document.getElementById('calories-net');
-        
-        // Confirmation modal elements
+
+        // confirmation modal
         const confirmationModal = document.getElementById('confirmation-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
         const confirmYesBtn = document.getElementById('confirm-yes-btn');
         const confirmNoBtn = document.getElementById('confirm-no-btn');
 
-        const API_KEY = ""; // Gemini API key is automatically provided
+        const API_KEY = ""; // Gemini API key if available
 
         let db, auth, userId;
-        let selectedDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
+        let selectedDate = new Date().toISOString().slice(0,10);
 
-        // --- Core Functions ---
-        
+        // helpers
         const showLoading = () => loadingOverlay.style.display = 'flex';
         const hideLoading = () => loadingOverlay.style.display = 'none';
-
-        const formatDate = (date) => date.toISOString().slice(0, 10);
+        const formatDate = (date) => date.toISOString().slice(0,10);
         const setDateInputs = (date) => {
             const dateStr = formatDate(date);
             journalDateInput.value = dateStr;
@@ -305,12 +263,13 @@
         const showTab = (tabId) => {
             tabContents.forEach(tab => tab.classList.remove('active'));
             navBtns.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById(`nav-${tabId.split('-')[0]}`).classList.add('active');
-            
-            if (tabId === 'counter-tab') {
-                updateCalorieCounter();
-            }
+            const tab = document.getElementById(tabId);
+            if (tab) tab.classList.add('active');
+            const navId = `nav-${tabId.split('-')[0]}`;
+            const navEl = document.getElementById(navId);
+            if (navEl) navEl.classList.add('active');
+
+            if (tabId === 'counter-tab') updateCalorieCounter();
         };
 
         const showCustomConfirmation = (title, message) => {
@@ -325,7 +284,6 @@
                     confirmNoBtn.removeEventListener('click', onNo);
                     resolve(true);
                 };
-
                 const onNo = () => {
                     confirmationModal.classList.add('hidden');
                     confirmYesBtn.removeEventListener('click', onYes);
@@ -339,6 +297,7 @@
         };
 
         const callGeminiApi = async (prompt, schema) => {
+            // unchanged - returns parsed JSON from API candidates
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
@@ -346,33 +305,42 @@
                     responseSchema: schema,
                 }
             };
-            
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
-
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
                 if (!response.ok) throw new Error(`API error: ${response.statusText}`);
                 const result = await response.json();
                 const jsonResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!jsonResponse) throw new Error("Invalid response from API.");
                 return JSON.parse(jsonResponse);
-            } catch (error) {
-                console.error("Error during API call:", error);
+            } catch (err) {
+                console.error("Error during API call:", err);
                 return null;
             }
         };
 
-        // --- Firebase Initialization & Authentication ---
+        // FIREBASE init (compat API)
         const initFirebase = async () => {
             try {
-                const firebaseApp = firebase.initializeApp(firebaseConfig);
+                // Safeguard: ensure firebaseConfig exists
+                if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+                    const msg = "Firebase configuration is missing. Make sure __firebase_config is provided.";
+                    console.error(msg);
+                    firebaseErrorEl.textContent = msg;
+                    firebaseErrorEl.classList.remove('hidden');
+                    authStatusEl.textContent = 'Config missing';
+                    return;
+                }
+
+                // initialize firebase (compat)
+                firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
+
                 setDateInputs(new Date());
 
                 auth.onAuthStateChanged((user) => {
@@ -399,13 +367,14 @@
                 }
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
+                firebaseErrorEl.textContent = "Firebase initialization failed. Check console for details.";
+                firebaseErrorEl.classList.remove('hidden');
                 authStatusEl.textContent = 'Error';
                 userIdEl.textContent = 'Failed';
             }
         };
 
-        // --- Pantry & Recipe Functions ---
-
+        // Pantry functions (unchanged, but rely on compat db)
         const setupPantryListener = (uid) => {
             db.collection(`artifacts/${appId}/users/${uid}/pantry`).orderBy('dateAdded').onSnapshot((snapshot) => {
                 pantryList.innerHTML = '';
@@ -426,18 +395,16 @@
                     `;
                     pantryList.appendChild(itemEl);
                 });
-                
+
                 document.querySelectorAll('.use-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const itemId = event.target.getAttribute('data-id');
                         const confirmed = await showCustomConfirmation('Remove Item', 'Are you sure you want to remove this item?');
                         if (confirmed) {
-                             try {
+                            try {
                                 await db.collection(`artifacts/${appId}/users/${uid}/pantry`).doc(itemId).delete();
                                 console.log("Item removed successfully.");
-                             } catch (error) {
-                                console.error("Error removing item:", error);
-                             }
+                            } catch (error) { console.error("Error removing item:", error); }
                         }
                     });
                 });
@@ -545,8 +512,7 @@
             } finally { hideLoading(); }
         };
 
-        // --- Food Journal Functions ---
-
+        // Journal / Activity / Counter functions (unchanged)
         const setupJournalListener = (uid) => {
             const date = journalDateInput.value;
             const q = db.collection(`artifacts/${appId}/users/${uid}/foodJournal`).where('dateLogged', '==', date).orderBy('timestamp', 'desc');
@@ -572,7 +538,7 @@
                     `;
                     journalList.appendChild(itemEl);
                 });
-                
+
                 document.querySelectorAll('.journal-delete-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const itemId = event.target.getAttribute('data-id');
@@ -586,7 +552,7 @@
                 });
             }, (error) => console.error("Error listening to journal data:", error));
         };
-        
+
         const getFoodCalories = async (food) => {
             const prompt = `Give me the estimated calorie count for "${food}". Respond only with the number.`;
             const schema = { type: "OBJECT", properties: { "calories": { "type": "NUMBER" } } };
@@ -611,7 +577,7 @@
             } catch (error) { console.error("Error logging food:", error); }
             finally { hideLoading(); }
         };
-        
+
         const clearJournalData = async () => {
             if (!userId) return;
             const confirmed = await showCustomConfirmation('Clear All Data', `Are you sure you want to delete all food journal entries for ${selectedDate}? This action cannot be undone.`);
@@ -625,8 +591,6 @@
                 hideLoading();
             }
         };
-
-        // --- Activity Tracker Functions ---
 
         const setupActivityListener = (uid) => {
             const date = trackerDateInput.value;
@@ -653,7 +617,7 @@
                     `;
                     activityList.appendChild(itemEl);
                 });
-                
+
                 document.querySelectorAll('.activity-delete-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const itemId = event.target.getAttribute('data-id');
@@ -667,7 +631,7 @@
                 });
             }, (error) => console.error("Error listening to activity data:", error));
         };
-        
+
         const getActivityCalories = async (activity) => {
             const prompt = `Give me the estimated calories burned for "${activity}". Respond only with the number.`;
             const schema = { type: "OBJECT", properties: { "calories": { "type": "NUMBER" } } };
@@ -692,7 +656,7 @@
             } catch (error) { console.error("Error logging activity:", error); }
             finally { hideLoading(); }
         };
-        
+
         const clearTrackerData = async () => {
             if (!userId) return;
             const confirmed = await showCustomConfirmation('Clear All Data', `Are you sure you want to delete all activity entries for ${selectedDate}? This action cannot be undone.`);
@@ -707,15 +671,13 @@
             }
         };
 
-        // --- Calorie Counter Functions ---
-
         const updateCalorieCounter = async () => {
             if (!userId) return;
             showLoading();
             try {
                 const foodSnapshot = await db.collection(`artifacts/${appId}/users/${userId}/foodJournal`).where('dateLogged', '==', selectedDate).get();
                 const activitySnapshot = await db.collection(`artifacts/${appId}/users/${userId}/activities`).where('dateLogged', '==', selectedDate).get();
-                
+
                 let caloriesConsumed = 0;
                 foodSnapshot.forEach(doc => caloriesConsumed += doc.data().calories || 0);
 
@@ -734,8 +696,7 @@
             }
         };
 
-        // --- Event Listeners ---
-
+        // Listeners
         navBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const tabId = `${e.currentTarget.id.split('-')[1]}-tab`;
@@ -743,7 +704,6 @@
             });
         });
 
-        // Pantry tab listeners
         addFoodBtn.addEventListener('click', addFoodToPantry);
         pantryFoodInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addFoodToPantry(); });
         generateRecipeBtn.addEventListener('click', generateRecipe);
@@ -752,8 +712,7 @@
             substitutionModal.classList.remove('hidden');
             substitutionInput.focus();
         });
-        
-        // Substitution modal listeners
+
         substitutionCancelBtn.addEventListener('click', () => { substitutionModal.classList.add('hidden'); });
         substituteConfirmBtn.addEventListener('click', () => {
             const ingredient = substitutionInput.value.trim();
@@ -763,7 +722,6 @@
             }
         });
 
-        // Journal tab listeners
         logFoodBtn.addEventListener('click', logFood);
         journalFoodInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logFood(); });
         journalDateInput.addEventListener('change', () => setupJournalListener(userId));
@@ -772,8 +730,7 @@
             setupJournalListener(userId);
         });
         clearJournalBtn.addEventListener('click', clearJournalData);
-        
-        // Activity Tracker tab listeners
+
         logActivityBtn.addEventListener('click', logActivity);
         activityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logActivity(); });
         trackerDateInput.addEventListener('change', () => setupActivityListener(userId));
@@ -782,15 +739,14 @@
             setupActivityListener(userId);
         });
         clearTrackerBtn.addEventListener('click', clearTrackerData);
-        
-        // Calorie Counter tab listeners
+
         counterDateInput.addEventListener('change', updateCalorieCounter);
         counterTodayBtn.addEventListener('click', () => {
             setDateInputs(new Date());
             updateCalorieCounter();
         });
 
-        // Initial application setup
+        // start
         window.onload = initFirebase;
     </script>
 </body>
