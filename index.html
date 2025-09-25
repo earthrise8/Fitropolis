@@ -29,6 +29,16 @@
             align-items: center;
             z-index: 100;
         }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .nav-btn.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+        }
     </style>
 
     <!-- Firebase SDKs - Loaded as global variables for GitHub Pages compatibility -->
@@ -36,7 +46,7 @@
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 flex flex-col items-center min-h-screen p-4">
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
@@ -50,7 +60,7 @@
     <!-- Main Content Container -->
     <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-2">Fitropolis</h1>
-        <p class="text-center text-gray-600 mb-6">Your personal virtual pantry and nutrition assistant.</p>
+        <p class="text-center text-gray-600 mb-6">Your all-in-one nutrition and activity tracker.</p>
 
         <!-- User Info & Authentication Section -->
         <div id="auth-section" class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -60,51 +70,120 @@
                 <p>User ID: <span id="user-id">N/A</span></p>
             </div>
         </div>
-
-        <!-- Virtual Pantry Section -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Virtual Pantry</h2>
-            <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                <input type="text" id="food-input" placeholder="Enter food name (e.g., Milk)" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="add-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Add to Pantry</button>
-            </div>
-            <div id="pantry-list" class="space-y-4">
-                <!-- Pantry items will be rendered here -->
-            </div>
-        </div>
-
-        <!-- Recipe Generator Section -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Recipe Generator</h2>
-            <button id="generate-recipe-btn" class="w-full p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4 flex items-center justify-center">
-                <i class="fas fa-magic mr-2"></i> Generate Recipe from Pantry
+        
+        <!-- Navigation Tabs -->
+        <nav class="flex justify-around bg-gray-100 p-2 rounded-lg mb-6">
+            <button id="nav-pantry" class="nav-btn active p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
+                <i class="fas fa-box"></i> Pantry
             </button>
-            <div id="recipe-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
-                <h3 class="text-xl font-bold mb-2">Generated Recipe</h3>
-                <h4 id="recipe-name" class="text-lg font-semibold text-gray-800 mb-1"></h4>
-                <p id="recipe-description" class="text-gray-600 mb-4"></p>
-                <h5 class="font-bold mb-1">Ingredients:</h5>
-                <ul id="recipe-ingredients" class="list-disc list-inside text-gray-700 mb-4"></ul>
-                <h5 class="font-bold mb-1">Instructions:</h5>
-                <ol id="recipe-instructions" class="list-decimal list-inside text-gray-700"></ol>
+            <button id="nav-journal" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
+                <i class="fas fa-book"></i> Food Journal
+            </button>
+            <button id="nav-tracker" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
+                <i class="fas fa-running"></i> Activity Tracker
+            </button>
+            <button id="nav-counter" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors">
+                <i class="fas fa-calculator"></i> Calorie Counter
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        
+        <!-- Pantry & Recipe Generator Tab -->
+        <div id="pantry-tab" class="tab-content active">
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Virtual Pantry</h2>
+                <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                    <input type="text" id="pantry-food-input" placeholder="Enter food name (e.g., Milk)" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="add-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Add to Pantry</button>
+                </div>
+                <div id="pantry-list" class="space-y-4"></div>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Recipe Generator</h2>
+                <button id="generate-recipe-btn" class="w-full p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4 flex items-center justify-center">
+                    <i class="fas fa-magic mr-2"></i> Generate Recipe from Pantry
+                </button>
+                <div id="recipe-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                    <h3 class="text-xl font-bold mb-2">Generated Recipe</h3>
+                    <h4 id="recipe-name" class="text-lg font-semibold text-gray-800 mb-1"></h4>
+                    <p id="recipe-description" class="text-gray-600 mb-4"></p>
+                    <h5 class="font-bold mb-1">Ingredients:</h5>
+                    <ul id="recipe-ingredients" class="list-disc list-inside text-gray-700 mb-4"></ul>
+                    <h5 class="font-bold mb-1">Instructions:</h5>
+                    <ol id="recipe-instructions" class="list-decimal list-inside text-gray-700"></ol>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">✨ More AI Features</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <button id="generate-meal-plan-btn" class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-calendar-alt mr-2"></i> Generate Meal Plan
+                    </button>
+                    <button id="substitute-ingredient-btn" class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                        <i class="fas fa-exchange-alt mr-2"></i> Ingredient Substitution
+                    </button>
+                </div>
+                <div id="ai-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                    <h3 id="ai-output-title" class="text-xl font-bold mb-2"></h3>
+                    <div id="ai-output-content" class="text-gray-700"></div>
+                </div>
             </div>
         </div>
 
-        <!-- AI-Powered Features Section -->
-        <div>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">✨ Powered by AI</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <button id="generate-meal-plan-btn" class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    <i class="fas fa-calendar-alt mr-2"></i> Generate Meal Plan
-                </button>
-                <button id="substitute-ingredient-btn" class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                    <i class="fas fa-exchange-alt mr-2"></i> Ingredient Substitution
-                </button>
+        <!-- Food Journal Tab -->
+        <div id="journal-tab" class="tab-content">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Food Journal</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                <input type="text" id="journal-food-input" placeholder="e.g., Apple, 100g" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="log-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Log Food</button>
             </div>
-            
-            <div id="ai-output" class="p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
-                <h3 id="ai-output-title" class="text-xl font-bold mb-2"></h3>
-                <div id="ai-output-content" class="text-gray-700"></div>
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <input type="date" id="journal-date-input" class="p-2 border border-gray-300 rounded-lg">
+                <button id="journal-today-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300">Today</button>
+                <button id="clear-journal-btn" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Clear All</button>
+            </div>
+            <div id="journal-list" class="space-y-4"></div>
+        </div>
+
+        <!-- Activity Tracker Tab -->
+        <div id="tracker-tab" class="tab-content">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Activity Tracker</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                <input type="text" id="activity-input" placeholder="e.g., Running, 30 min" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="log-activity-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Log Activity</button>
+            </div>
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <input type="date" id="tracker-date-input" class="p-2 border border-gray-300 rounded-lg">
+                <button id="tracker-today-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300">Today</button>
+                <button id="clear-tracker-btn" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Clear All</button>
+            </div>
+            <div id="activity-list" class="space-y-4"></div>
+        </div>
+
+        <!-- Calorie Counter Tab -->
+        <div id="counter-tab" class="tab-content">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Calorie Counter</h2>
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <input type="date" id="counter-date-input" class="p-2 border border-gray-300 rounded-lg">
+                <button id="counter-today-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300">Today</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-700">Consumed</h3>
+                    <p id="calories-consumed" class="text-3xl font-bold text-green-600 mt-2">0</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-700">Burned</h3>
+                    <p id="calories-burned" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-700">Net</h3>
+                    <p id="calories-net" class="text-3xl font-bold text-blue-600 mt-2">0</p>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                Calorie values are AI-estimated and for reference only.
             </div>
         </div>
     </div>
@@ -123,6 +202,18 @@
             </div>
         </div>
     </div>
+    
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-2xl font-semibold mb-4" id="modal-title">Confirm Action</h3>
+            <p id="modal-message" class="mb-4">Are you sure you want to proceed?</p>
+            <div class="flex justify-end gap-2">
+                <button id="confirm-yes-btn" class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Yes</button>
+                <button id="confirm-no-btn" class="p-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">No</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Set the debug level for Firebase
@@ -136,7 +227,14 @@
         // UI elements
         const authStatusEl = document.getElementById('auth-status');
         const userIdEl = document.getElementById('user-id');
-        const foodInput = document.getElementById('food-input');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        // Navigation buttons
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Pantry tab elements
+        const pantryFoodInput = document.getElementById('pantry-food-input');
         const addFoodBtn = document.getElementById('add-food-btn');
         const pantryList = document.getElementById('pantry-list');
         const generateRecipeBtn = document.getElementById('generate-recipe-btn');
@@ -150,21 +248,132 @@
         const aiOutput = document.getElementById('ai-output');
         const aiOutputTitle = document.getElementById('ai-output-title');
         const aiOutputContent = document.getElementById('ai-output-content');
-        const loadingOverlay = document.getElementById('loading-overlay');
         const substitutionModal = document.getElementById('substitution-modal');
         const substitutionInput = document.getElementById('substitution-input');
         const substituteConfirmBtn = document.getElementById('substitute-confirm-btn');
         const substitutionCancelBtn = document.getElementById('substitution-cancel-btn');
+
+        // Journal tab elements
+        const journalFoodInput = document.getElementById('journal-food-input');
+        const logFoodBtn = document.getElementById('log-food-btn');
+        const journalList = document.getElementById('journal-list');
+        const journalDateInput = document.getElementById('journal-date-input');
+        const journalTodayBtn = document.getElementById('journal-today-btn');
+        const clearJournalBtn = document.getElementById('clear-journal-btn');
+
+        // Tracker tab elements
+        const activityInput = document.getElementById('activity-input');
+        const logActivityBtn = document.getElementById('log-activity-btn');
+        const activityList = document.getElementById('activity-list');
+        const trackerDateInput = document.getElementById('tracker-date-input');
+        const trackerTodayBtn = document.getElementById('tracker-today-btn');
+        const clearTrackerBtn = document.getElementById('clear-tracker-btn');
+        
+        // Calorie Counter tab elements
+        const counterDateInput = document.getElementById('counter-date-input');
+        const counterTodayBtn = document.getElementById('counter-today-btn');
+        const caloriesConsumedEl = document.getElementById('calories-consumed');
+        const caloriesBurnedEl = document.getElementById('calories-burned');
+        const caloriesNetEl = document.getElementById('calories-net');
+        
+        // Confirmation modal elements
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const confirmYesBtn = document.getElementById('confirm-yes-btn');
+        const confirmNoBtn = document.getElementById('confirm-no-btn');
+
         const API_KEY = ""; // Gemini API key is automatically provided
 
         let db, auth, userId;
+        let selectedDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
 
-        // Initialize Firebase and handle authentication
+        // --- Core Functions ---
+        
+        const showLoading = () => loadingOverlay.style.display = 'flex';
+        const hideLoading = () => loadingOverlay.style.display = 'none';
+
+        const formatDate = (date) => date.toISOString().slice(0, 10);
+        const setDateInputs = (date) => {
+            const dateStr = formatDate(date);
+            journalDateInput.value = dateStr;
+            trackerDateInput.value = dateStr;
+            counterDateInput.value = dateStr;
+            selectedDate = dateStr;
+        };
+
+        const showTab = (tabId) => {
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            navBtns.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById(`nav-${tabId.split('-')[0]}`).classList.add('active');
+            
+            if (tabId === 'counter-tab') {
+                updateCalorieCounter();
+            }
+        };
+
+        const showCustomConfirmation = (title, message) => {
+            return new Promise((resolve) => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                confirmationModal.classList.remove('hidden');
+
+                const onYes = () => {
+                    confirmationModal.classList.add('hidden');
+                    confirmYesBtn.removeEventListener('click', onYes);
+                    confirmNoBtn.removeEventListener('click', onNo);
+                    resolve(true);
+                };
+
+                const onNo = () => {
+                    confirmationModal.classList.add('hidden');
+                    confirmYesBtn.removeEventListener('click', onYes);
+                    confirmNoBtn.removeEventListener('click', onNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', onYes);
+                confirmNoBtn.addEventListener('click', onNo);
+            });
+        };
+
+        const callGeminiApi = async (prompt, schema) => {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema,
+                }
+            };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                const result = await response.json();
+                const jsonResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonResponse) throw new Error("Invalid response from API.");
+                return JSON.parse(jsonResponse);
+            } catch (error) {
+                console.error("Error during API call:", error);
+                return null;
+            }
+        };
+
+        // --- Firebase Initialization & Authentication ---
         const initFirebase = async () => {
             try {
                 const firebaseApp = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
+                setDateInputs(new Date());
 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
@@ -173,6 +382,9 @@
                         userIdEl.textContent = userId;
                         console.log("Firebase initialized and user signed in:", userId);
                         setupPantryListener(userId);
+                        setupJournalListener(userId);
+                        setupActivityListener(userId);
+                        updateCalorieCounter();
                     } else {
                         authStatusEl.textContent = 'Signed Out';
                         userIdEl.textContent = 'N/A';
@@ -192,31 +404,24 @@
             }
         };
 
-        // Set up real-time listener for the virtual pantry
+        // --- Pantry & Recipe Functions ---
+
         const setupPantryListener = (uid) => {
-            const userPantryCollectionRef = db.collection(`artifacts/${appId}/users/${uid}/pantry`);
-            const q = userPantryCollectionRef.orderBy('dateAdded'); // Use Firestore query for sorting
-
-            q.onSnapshot((snapshot) => {
+            db.collection(`artifacts/${appId}/users/${uid}/pantry`).orderBy('dateAdded').onSnapshot((snapshot) => {
                 pantryList.innerHTML = '';
-                const items = [];
-                snapshot.forEach(doc => {
-                    items.push({ id: doc.id, ...doc.data() });
-                });
-
-                if (items.length === 0) {
+                if (snapshot.empty) {
                     pantryList.innerHTML = '<p class="text-center text-gray-500">Your pantry is empty. Add some food!</p>';
                     return;
                 }
-
-                items.forEach(item => {
+                snapshot.forEach(doc => {
+                    const item = doc.data();
                     const itemEl = document.createElement('div');
                     itemEl.className = 'flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200';
                     itemEl.innerHTML = `
                         <span class="text-gray-700">${item.name}</span>
                         <div class="flex items-center space-x-2">
                             <span class="text-sm text-gray-500">Added: ${new Date(item.dateAdded).toLocaleDateString()}</span>
-                            <button data-id="${item.id}" class="use-btn p-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Use</button>
+                            <button data-id="${doc.id}" class="use-btn p-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Use</button>
                         </div>
                     `;
                     pantryList.appendChild(itemEl);
@@ -225,305 +430,364 @@
                 document.querySelectorAll('.use-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const itemId = event.target.getAttribute('data-id');
-                        console.log("A confirmation dialog would appear here. Item to remove:", itemId);
-                        // In a real app, this is where you'd show a custom modal for confirmation.
-                        try {
-                           const itemRef = db.collection(`artifacts/${appId}/users/${uid}/pantry`).doc(itemId);
-                           await itemRef.delete();
-                           console.log("Item removed successfully.");
-                        } catch (error) {
-                           console.error("Error removing item:", error);
+                        const confirmed = await showCustomConfirmation('Remove Item', 'Are you sure you want to remove this item?');
+                        if (confirmed) {
+                             try {
+                                await db.collection(`artifacts/${appId}/users/${uid}/pantry`).doc(itemId).delete();
+                                console.log("Item removed successfully.");
+                             } catch (error) {
+                                console.error("Error removing item:", error);
+                             }
                         }
                     });
                 });
-            }, (error) => {
-                console.error("Error listening to pantry data:", error);
-                pantryList.innerHTML = '<p class="text-center text-red-500">Failed to load pantry data.</p>';
-            });
+            }, (error) => console.error("Error listening to pantry data:", error));
         };
 
-        // Add food to the pantry
         const addFoodToPantry = async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-
-            const foodName = foodInput.value.trim();
-            if (foodName === '') {
-                return;
-            }
-
+            if (!userId) return;
+            const foodName = pantryFoodInput.value.trim();
+            if (foodName === '') return;
             try {
-                const docRef = await db.collection(`artifacts/${appId}/users/${userId}/pantry`).add({
-                    name: foodName,
-                    dateAdded: new Date().toISOString(),
-                });
-                console.log("Document written with ID:", docRef.id);
-                foodInput.value = '';
-            } catch (error) {
-                console.error("Error adding document:", error);
-            }
+                await db.collection(`artifacts/${appId}/users/${userId}/pantry`).add({ name: foodName, dateAdded: new Date().toISOString() });
+                pantryFoodInput.value = '';
+            } catch (error) { console.error("Error adding document:", error); }
         };
 
-        // Function to make API calls to Gemini
-        const callGeminiApi = async (prompt, schema) => {
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: schema,
-                }
-            };
-            
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
-
-            let response;
-            try {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                    const jsonResponse = result.candidates[0].content.parts[0].text;
-                    return JSON.parse(jsonResponse);
-                } else {
-                    throw new Error("Invalid response from API.");
-                }
-            } catch (error) {
-                console.error("Error during API call:", error);
-                return null;
-            }
+        const getPantryItems = async () => {
+            const items = [];
+            if (!userId) return items;
+            const snapshot = await db.collection(`artifacts/${appId}/users/${userId}/pantry`).get();
+            snapshot.forEach(doc => items.push(doc.data().name));
+            return items;
         };
 
-        // Function to generate a recipe from the AI model
         const generateRecipe = async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-
-            loadingOverlay.style.display = 'flex';
+            if (!userId) return;
+            showLoading();
             recipeOutput.classList.add('hidden');
             aiOutput.classList.add('hidden');
-
             try {
                 const pantryItems = await getPantryItems();
-                const userPrompt = `Generate a single, unique, and easy-to-make recipe using only the following ingredients from my pantry: ${pantryItems.join(', ')}. Provide a brief description of the dish.`;
-
-                const recipeSchema = {
+                const prompt = `Generate a unique, easy-to-make recipe using only these ingredients: ${pantryItems.join(', ')}. Provide a brief description.`;
+                const schema = {
                     type: "OBJECT",
-                    properties: {
-                        "recipeName": { "type": "STRING" },
-                        "description": { "type": "STRING" },
-                        "ingredients": {
-                            "type": "ARRAY",
-                            "items": { "type": "STRING" }
-                        },
-                        "instructions": {
-                            "type": "ARRAY",
-                            "items": { "type": "STRING" }
-                        }
-                    },
+                    properties: { "recipeName": { "type": "STRING" }, "description": { "type": "STRING" }, "ingredients": { "type": "ARRAY", "items": { "type": "STRING" } }, "instructions": { "type": "ARRAY", "items": { "type": "STRING" } } },
                     "propertyOrdering": ["recipeName", "description", "ingredients", "instructions"]
                 };
-
-                const recipe = await callGeminiApi(userPrompt, recipeSchema);
-                
+                const recipe = await callGeminiApi(prompt, schema);
                 if (recipe) {
                     recipeNameEl.textContent = recipe.recipeName;
                     recipeDescEl.textContent = recipe.description;
-                    
-                    recipeIngredientsEl.innerHTML = '';
-                    recipe.ingredients.forEach(ingredient => {
-                        const li = document.createElement('li');
-                        li.textContent = ingredient;
-                        recipeIngredientsEl.appendChild(li);
-                    });
-
-                    recipeInstructionsEl.innerHTML = '';
-                    recipe.instructions.forEach(instruction => {
-                        const li = document.createElement('li');
-                        li.textContent = instruction;
-                        recipeInstructionsEl.appendChild(li);
-                    });
-                    
+                    recipeIngredientsEl.innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+                    recipeInstructionsEl.innerHTML = recipe.instructions.map(i => `<li>${i}</li>`).join('');
                     recipeOutput.classList.remove('hidden');
                 } else {
-                    recipeOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate a recipe. Please try again.</p>';
+                    recipeOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate recipe. Try again.</p>';
                     recipeOutput.classList.remove('hidden');
                 }
-            } finally {
-                loadingOverlay.style.display = 'none';
-            }
+            } finally { hideLoading(); }
         };
 
-        // Function to get pantry items
-        const getPantryItems = async () => {
-            const pantryItems = [];
-            if (!userId) return pantryItems;
-            
-            const pantryRef = db.collection(`artifacts/${appId}/users/${userId}/pantry`);
-            const querySnapshot = await pantryRef.get();
-            querySnapshot.forEach(doc => {
-                pantryItems.push(doc.data().name);
-            });
-            return pantryItems;
-        }
-
-        // Function to generate a meal plan
         const generateMealPlan = async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-
-            loadingOverlay.style.display = 'flex';
-            recipeOutput.classList.add('hidden');
+            if (!userId) return;
+            showLoading();
             aiOutput.classList.add('hidden');
-
             try {
                 const pantryItems = await getPantryItems();
-                const userPrompt = `Generate a simple, 3-day meal plan (breakfast, lunch, dinner) using the following ingredients from my pantry: ${pantryItems.join(', ')}. Please provide a title for the meal plan, a brief description, and then a list of meals for each day.`;
-
-                const mealPlanSchema = {
+                const prompt = `Generate a simple, 3-day meal plan (breakfast, lunch, dinner) using these ingredients: ${pantryItems.join(', ')}.`;
+                const schema = {
                     type: "OBJECT",
-                    properties: {
-                        "planTitle": { "type": "STRING" },
-                        "planDescription": { "type": "STRING" },
-                        "days": {
-                            "type": "ARRAY",
-                            "items": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "dayName": { "type": "STRING" },
-                                    "meals": {
-                                        "type": "ARRAY",
-                                        "items": {
-                                            "type": "OBJECT",
-                                            "properties": {
-                                                "mealName": { "type": "STRING" },
-                                                "description": { "type": "STRING" },
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
+                    properties: { "planTitle": { "type": "STRING" }, "planDescription": { "type": "STRING" }, "days": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "dayName": { "type": "STRING" }, "meals": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "mealName": { "type": "STRING" }, "description": { "type": "STRING" } } } } } } } },
                     "propertyOrdering": ["planTitle", "planDescription", "days"]
                 };
-
-                const mealPlan = await callGeminiApi(userPrompt, mealPlanSchema);
-                
+                const mealPlan = await callGeminiApi(prompt, schema);
                 if (mealPlan) {
                     aiOutputTitle.textContent = mealPlan.planTitle;
                     let contentHtml = `<p class="mb-4">${mealPlan.planDescription}</p>`;
                     mealPlan.days.forEach(day => {
                         contentHtml += `<h4 class="font-bold mt-4">${day.dayName}</h4><ul class="list-inside list-disc">`;
-                        day.meals.forEach(meal => {
-                            contentHtml += `<li><strong>${meal.mealName}:</strong> ${meal.description}</li>`;
-                        });
+                        contentHtml += day.meals.map(m => `<li><strong>${m.mealName}:</strong> ${m.description}</li>`).join('');
                         contentHtml += `</ul>`;
                     });
                     aiOutputContent.innerHTML = contentHtml;
                     aiOutput.classList.remove('hidden');
                 } else {
-                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate a meal plan. Please try again.</p>';
+                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to generate meal plan. Try again.</p>';
                     aiOutput.classList.remove('hidden');
                 }
-            } finally {
-                loadingOverlay.style.display = 'none';
-            }
+            } finally { hideLoading(); }
         };
 
-        // Function to get ingredient substitutions
         const getSubstitutions = async (ingredient) => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-
-            loadingOverlay.style.display = 'flex';
-            recipeOutput.classList.add('hidden');
+            if (!userId) return;
+            showLoading();
             aiOutput.classList.add('hidden');
-
             try {
-                const userPrompt = `Provide a list of 3-5 healthy and creative ingredient substitutions for "${ingredient}". Include a brief explanation for why each substitution works.`;
-                const substitutionSchema = {
+                const prompt = `Provide a list of 3-5 healthy and creative ingredient substitutions for "${ingredient}". Include a brief explanation for why each substitution works.`;
+                const schema = {
                     type: "OBJECT",
-                    properties: {
-                        "substitutions": {
-                            "type": "ARRAY",
-                            "items": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "item": { "type": "STRING" },
-                                    "reason": { "type": "STRING" }
-                                }
-                            }
-                        }
-                    },
+                    properties: { "substitutions": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "item": { "type": "STRING" }, "reason": { "type": "STRING" } } } } },
                     "propertyOrdering": ["substitutions"]
                 };
-
-                const substitutions = await callGeminiApi(userPrompt, substitutionSchema);
-
+                const substitutions = await callGeminiApi(prompt, schema);
                 if (substitutions) {
                     aiOutputTitle.textContent = `Substitutions for ${ingredient}`;
                     let contentHtml = `<ul class="list-disc list-inside space-y-2">`;
-                    substitutions.substitutions.forEach(sub => {
-                        contentHtml += `<li><strong>${sub.item}</strong>: ${sub.reason}</li>`;
-                    });
+                    contentHtml += substitutions.substitutions.map(sub => `<li><strong>${sub.item}</strong>: ${sub.reason}</li>`).join('');
                     contentHtml += `</ul>`;
                     aiOutputContent.innerHTML = contentHtml;
                     aiOutput.classList.remove('hidden');
                 } else {
-                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to find substitutions. Please try a different ingredient.</p>';
+                    aiOutput.innerHTML = '<p class="text-center text-red-500">Failed to find substitutions. Try again.</p>';
                     aiOutput.classList.remove('hidden');
                 }
-            } finally {
-                loadingOverlay.style.display = 'none';
-            }
+            } finally { hideLoading(); }
+        };
+
+        // --- Food Journal Functions ---
+
+        const setupJournalListener = (uid) => {
+            const date = journalDateInput.value;
+            const q = db.collection(`artifacts/${appId}/users/${uid}/foodJournal`).where('dateLogged', '==', date).orderBy('timestamp', 'desc');
+            q.onSnapshot((snapshot) => {
+                journalList.innerHTML = '';
+                if (snapshot.empty) {
+                    journalList.innerHTML = '<p class="text-center text-gray-500">Your journal is empty for this day. Log some food!</p>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200';
+                    itemEl.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700 font-medium">${item.name}</span>
+                            <span class="text-sm text-gray-500">${item.calories !== null ? `${item.calories} calories` : 'Calories: N/A'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">${new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <button data-id="${doc.id}" class="journal-delete-btn p-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+                        </div>
+                    `;
+                    journalList.appendChild(itemEl);
+                });
+                
+                document.querySelectorAll('.journal-delete-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const itemId = event.target.getAttribute('data-id');
+                        const confirmed = await showCustomConfirmation('Delete Entry', 'Are you sure you want to delete this food entry?');
+                        if (confirmed) {
+                            try {
+                                await db.collection(`artifacts/${appId}/users/${uid}/foodJournal`).doc(itemId).delete();
+                            } catch (error) { console.error("Error deleting journal entry:", error); }
+                        }
+                    });
+                });
+            }, (error) => console.error("Error listening to journal data:", error));
         };
         
-        // Modal functions
-        const showSubstitutionModal = () => {
-            substitutionModal.classList.remove('hidden');
-            substitutionInput.focus();
+        const getFoodCalories = async (food) => {
+            const prompt = `Give me the estimated calorie count for "${food}". Respond only with the number.`;
+            const schema = { type: "OBJECT", properties: { "calories": { "type": "NUMBER" } } };
+            const result = await callGeminiApi(prompt, schema);
+            return result?.calories || 0;
         };
 
-        const hideSubstitutionModal = () => {
-            substitutionModal.classList.add('hidden');
+        const logFood = async () => {
+            if (!userId) return;
+            const foodName = journalFoodInput.value.trim();
+            if (foodName === '') return;
+            showLoading();
+            try {
+                const calories = await getFoodCalories(foodName);
+                await db.collection(`artifacts/${appId}/users/${userId}/foodJournal`).add({
+                    name: foodName,
+                    calories: calories,
+                    dateLogged: selectedDate,
+                    timestamp: new Date().getTime()
+                });
+                journalFoodInput.value = '';
+            } catch (error) { console.error("Error logging food:", error); }
+            finally { hideLoading(); }
         };
-
-        // Event Listeners
-        addFoodBtn.addEventListener('click', addFoodToPantry);
-        foodInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addFoodToPantry();
+        
+        const clearJournalData = async () => {
+            if (!userId) return;
+            const confirmed = await showCustomConfirmation('Clear All Data', `Are you sure you want to delete all food journal entries for ${selectedDate}? This action cannot be undone.`);
+            if (confirmed) {
+                showLoading();
+                const q = db.collection(`artifacts/${appId}/users/${userId}/foodJournal`).where('dateLogged', '==', selectedDate);
+                const snapshot = await q.get();
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                hideLoading();
             }
+        };
+
+        // --- Activity Tracker Functions ---
+
+        const setupActivityListener = (uid) => {
+            const date = trackerDateInput.value;
+            const q = db.collection(`artifacts/${appId}/users/${uid}/activities`).where('dateLogged', '==', date).orderBy('timestamp', 'desc');
+            q.onSnapshot((snapshot) => {
+                activityList.innerHTML = '';
+                if (snapshot.empty) {
+                    activityList.innerHTML = '<p class="text-center text-gray-500">Your activity log is empty for this day. Log an activity!</p>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200';
+                    itemEl.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700 font-medium">${item.name}</span>
+                            <span class="text-sm text-gray-500">${item.caloriesBurned !== null ? `${item.caloriesBurned} calories burned` : 'Calories: N/A'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">${new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <button data-id="${doc.id}" class="activity-delete-btn p-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+                        </div>
+                    `;
+                    activityList.appendChild(itemEl);
+                });
+                
+                document.querySelectorAll('.activity-delete-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const itemId = event.target.getAttribute('data-id');
+                        const confirmed = await showCustomConfirmation('Delete Entry', 'Are you sure you want to delete this activity entry?');
+                        if (confirmed) {
+                            try {
+                                await db.collection(`artifacts/${appId}/users/${uid}/activities`).doc(itemId).delete();
+                            } catch (error) { console.error("Error deleting activity entry:", error); }
+                        }
+                    });
+                });
+            }, (error) => console.error("Error listening to activity data:", error));
+        };
+        
+        const getActivityCalories = async (activity) => {
+            const prompt = `Give me the estimated calories burned for "${activity}". Respond only with the number.`;
+            const schema = { type: "OBJECT", properties: { "calories": { "type": "NUMBER" } } };
+            const result = await callGeminiApi(prompt, schema);
+            return result?.calories || 0;
+        };
+
+        const logActivity = async () => {
+            if (!userId) return;
+            const activityName = activityInput.value.trim();
+            if (activityName === '') return;
+            showLoading();
+            try {
+                const caloriesBurned = await getActivityCalories(activityName);
+                await db.collection(`artifacts/${appId}/users/${userId}/activities`).add({
+                    name: activityName,
+                    caloriesBurned: caloriesBurned,
+                    dateLogged: selectedDate,
+                    timestamp: new Date().getTime()
+                });
+                activityInput.value = '';
+            } catch (error) { console.error("Error logging activity:", error); }
+            finally { hideLoading(); }
+        };
+        
+        const clearTrackerData = async () => {
+            if (!userId) return;
+            const confirmed = await showCustomConfirmation('Clear All Data', `Are you sure you want to delete all activity entries for ${selectedDate}? This action cannot be undone.`);
+            if (confirmed) {
+                showLoading();
+                const q = db.collection(`artifacts/${appId}/users/${userId}/activities`).where('dateLogged', '==', selectedDate);
+                const snapshot = await q.get();
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                hideLoading();
+            }
+        };
+
+        // --- Calorie Counter Functions ---
+
+        const updateCalorieCounter = async () => {
+            if (!userId) return;
+            showLoading();
+            try {
+                const foodSnapshot = await db.collection(`artifacts/${appId}/users/${userId}/foodJournal`).where('dateLogged', '==', selectedDate).get();
+                const activitySnapshot = await db.collection(`artifacts/${appId}/users/${userId}/activities`).where('dateLogged', '==', selectedDate).get();
+                
+                let caloriesConsumed = 0;
+                foodSnapshot.forEach(doc => caloriesConsumed += doc.data().calories || 0);
+
+                let caloriesBurned = 0;
+                activitySnapshot.forEach(doc => caloriesBurned += doc.data().caloriesBurned || 0);
+
+                const netCalories = caloriesConsumed - caloriesBurned;
+
+                caloriesConsumedEl.textContent = caloriesConsumed;
+                caloriesBurnedEl.textContent = caloriesBurned;
+                caloriesNetEl.textContent = netCalories;
+            } catch (error) {
+                console.error("Error updating calorie counter:", error);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // --- Event Listeners ---
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabId = `${e.currentTarget.id.split('-')[1]}-tab`;
+                showTab(tabId);
+            });
         });
 
+        // Pantry tab listeners
+        addFoodBtn.addEventListener('click', addFoodToPantry);
+        pantryFoodInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addFoodToPantry(); });
         generateRecipeBtn.addEventListener('click', generateRecipe);
         generateMealPlanBtn.addEventListener('click', generateMealPlan);
-        substituteIngredientBtn.addEventListener('click', showSubstitutionModal);
+        substituteIngredientBtn.addEventListener('click', () => {
+            substitutionModal.classList.remove('hidden');
+            substitutionInput.focus();
+        });
         
-        substitutionCancelBtn.addEventListener('click', hideSubstitutionModal);
+        // Substitution modal listeners
+        substitutionCancelBtn.addEventListener('click', () => { substitutionModal.classList.add('hidden'); });
         substituteConfirmBtn.addEventListener('click', () => {
             const ingredient = substitutionInput.value.trim();
             if (ingredient) {
                 getSubstitutions(ingredient);
-                hideSubstitutionModal();
+                substitutionModal.classList.add('hidden');
             }
+        });
+
+        // Journal tab listeners
+        logFoodBtn.addEventListener('click', logFood);
+        journalFoodInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logFood(); });
+        journalDateInput.addEventListener('change', () => setupJournalListener(userId));
+        journalTodayBtn.addEventListener('click', () => {
+            setDateInputs(new Date());
+            setupJournalListener(userId);
+        });
+        clearJournalBtn.addEventListener('click', clearJournalData);
+        
+        // Activity Tracker tab listeners
+        logActivityBtn.addEventListener('click', logActivity);
+        activityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logActivity(); });
+        trackerDateInput.addEventListener('change', () => setupActivityListener(userId));
+        trackerTodayBtn.addEventListener('click', () => {
+            setDateInputs(new Date());
+            setupActivityListener(userId);
+        });
+        clearTrackerBtn.addEventListener('click', clearTrackerData);
+        
+        // Calorie Counter tab listeners
+        counterDateInput.addEventListener('change', updateCalorieCounter);
+        counterTodayBtn.addEventListener('click', () => {
+            setDateInputs(new Date());
+            updateCalorieCounter();
         });
 
         // Initial application setup
