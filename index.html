@@ -4,14 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Fitropolis</title>
-    <!-- Use Tailwind CSS built file for production -->
-    <link rel="stylesheet" href="tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Prevent favicon 404 error -->
-    <link rel="icon" href="data:,">
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .container { max-width: 800px; }
@@ -20,7 +18,8 @@
         .tab-content.active { display:block; }
         .nav-btn.active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
     </style>
-    <!-- Firebase compat builds -->
+
+    <!-- NOTE: Using compat builds so existing namespaced API (firebase.auth(), firebase.firestore(), etc.) works -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
@@ -57,12 +56,12 @@
             <button id="nav-counter" class="nav-btn p-2 text-center font-medium text-gray-600 hover:text-blue-500 transition-colors"><i class="fas fa-calculator"></i> Calorie Counter</button>
         </nav>
 
-        <!-- Tab contents -->
+        <!-- Tab contents (kept same as your original) -->
         <div id="pantry-tab" class="tab-content active">
             <div class="mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Virtual Pantry</h2>
                 <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                    <input type="text" id="pantry-food-input" placeholder="Enter food name (e.g., Milk)" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                    <input type="text" id="pantry-food-input" placeholder="Enter food name (e.g., Milk)" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button id="add-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Add to Pantry</button>
                 </div>
                 <div id="pantry-list" class="space-y-4"></div>
@@ -100,7 +99,7 @@
         <div id="journal-tab" class="tab-content">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Food Journal</h2>
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                <input type="text" id="journal-food-input" placeholder="e.g., Apple, 100g" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input type="text" id="journal-food-input" placeholder="e.g., Apple, 100g" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button id="log-food-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Log Food</button>
             </div>
             <div class="flex items-center justify-between gap-4 mb-4">
@@ -114,7 +113,7 @@
         <div id="tracker-tab" class="tab-content">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Activity Tracker</h2>
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                <input type="text" id="activity-input" placeholder="e.g., Running, 30 min" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input type="text" id="activity-input" placeholder="e.g., Running, 30 min" class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button id="log-activity-btn" class="w-full sm:w-auto p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Log Activity</button>
             </div>
             <div class="flex items-center justify-between gap-4 mb-4">
@@ -166,7 +165,7 @@
         </div>
     </div>
 
-    <!-- Confirmation modal -->
+    <!-- Conf modal -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <h3 class="text-2xl font-semibold mb-4" id="modal-title">Confirm Action</h3>
@@ -278,6 +277,7 @@
                 modalTitle.textContent = title;
                 modalMessage.textContent = message;
                 confirmationModal.classList.remove('hidden');
+
                 const onYes = () => {
                     confirmationModal.classList.add('hidden');
                     confirmYesBtn.removeEventListener('click', onYes);
@@ -290,6 +290,7 @@
                     confirmNoBtn.removeEventListener('click', onNo);
                     resolve(false);
                 };
+
                 confirmYesBtn.addEventListener('click', onYes);
                 confirmNoBtn.addEventListener('click', onNo);
             });
@@ -322,29 +323,25 @@
             }
         };
 
-        // Firebase init with config check and safe listener guards
+        // FIREBASE init (compat API)
         const initFirebase = async () => {
             try {
+                // Safeguard: ensure firebaseConfig exists
                 if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
                     const msg = "Firebase configuration is missing. Make sure __firebase_config is provided.";
                     console.error(msg);
                     firebaseErrorEl.textContent = msg;
                     firebaseErrorEl.classList.remove('hidden');
                     authStatusEl.textContent = 'Config missing';
-                    // Prevent any further initialization
                     return;
                 }
 
+                // initialize firebase (compat)
                 firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
 
                 setDateInputs(new Date());
-
-                // Safe wrappers to prevent errors if db or userId is missing
-                const safeSetupPantryListener = (uid) => { if (db && uid) setupPantryListener(uid); };
-                const safeSetupJournalListener = (uid) => { if (db && uid) setupJournalListener(uid); };
-                const safeSetupActivityListener = (uid) => { if (db && uid) setupActivityListener(uid); };
 
                 auth.onAuthStateChanged((user) => {
                     if (user) {
@@ -352,9 +349,9 @@
                         authStatusEl.textContent = 'Signed In';
                         userIdEl.textContent = userId;
                         console.log("Firebase initialized and user signed in:", userId);
-                        safeSetupPantryListener(userId);
-                        safeSetupJournalListener(userId);
-                        safeSetupActivityListener(userId);
+                        setupPantryListener(userId);
+                        setupJournalListener(userId);
+                        setupActivityListener(userId);
                         updateCalorieCounter();
                     } else {
                         authStatusEl.textContent = 'Signed Out';
@@ -368,19 +365,6 @@
                 } else {
                     await auth.signInAnonymously();
                 }
-
-                // UI event safe wrappers
-                journalDateInput.addEventListener('change', () => safeSetupJournalListener(userId));
-                journalTodayBtn.addEventListener('click', () => {
-                    setDateInputs(new Date());
-                    safeSetupJournalListener(userId);
-                });
-                trackerDateInput.addEventListener('change', () => safeSetupActivityListener(userId));
-                trackerTodayBtn.addEventListener('click', () => {
-                    setDateInputs(new Date());
-                    safeSetupActivityListener(userId);
-                });
-
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 firebaseErrorEl.textContent = "Firebase initialization failed. Check console for details.";
@@ -390,7 +374,7 @@
             }
         };
 
-        // Pantry functions
+        // Pantry functions (unchanged, but rely on compat db)
         const setupPantryListener = (uid) => {
             db.collection(`artifacts/${appId}/users/${uid}/pantry`).orderBy('dateAdded').onSnapshot((snapshot) => {
                 pantryList.innerHTML = '';
@@ -528,9 +512,8 @@
             } finally { hideLoading(); }
         };
 
-        // Journal / Activity / Counter functions
+        // Journal / Activity / Counter functions (unchanged)
         const setupJournalListener = (uid) => {
-            if (!db || !uid) return;
             const date = journalDateInput.value;
             const q = db.collection(`artifacts/${appId}/users/${uid}/foodJournal`).where('dateLogged', '==', date).orderBy('timestamp', 'desc');
             q.onSnapshot((snapshot) => {
@@ -610,7 +593,6 @@
         };
 
         const setupActivityListener = (uid) => {
-            if (!db || !uid) return;
             const date = trackerDateInput.value;
             const q = db.collection(`artifacts/${appId}/users/${uid}/activities`).where('dateLogged', '==', date).orderBy('timestamp', 'desc');
             q.onSnapshot((snapshot) => {
@@ -742,10 +724,20 @@
 
         logFoodBtn.addEventListener('click', logFood);
         journalFoodInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logFood(); });
+        journalDateInput.addEventListener('change', () => setupJournalListener(userId));
+        journalTodayBtn.addEventListener('click', () => {
+            setDateInputs(new Date());
+            setupJournalListener(userId);
+        });
         clearJournalBtn.addEventListener('click', clearJournalData);
 
         logActivityBtn.addEventListener('click', logActivity);
         activityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') logActivity(); });
+        trackerDateInput.addEventListener('change', () => setupActivityListener(userId));
+        trackerTodayBtn.addEventListener('click', () => {
+            setDateInputs(new Date());
+            setupActivityListener(userId);
+        });
         clearTrackerBtn.addEventListener('click', clearTrackerData);
 
         counterDateInput.addEventListener('change', updateCalorieCounter);
